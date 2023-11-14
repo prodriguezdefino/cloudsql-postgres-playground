@@ -15,7 +15,7 @@ if [ $DB_EXISTS -ne 0 ]; then
     # this are all needed for the replication job, besides the specific flags needed at instance creation time
     psql -d "user='postgres' password='${pg_psswd}' host='${pg_public_ip}'" -c 'ALTER USER postgres WITH REPLICATION;'
     psql -d "dbname='${db_name}' user='postgres' password='${pg_psswd}' host='${pg_public_ip}'" -c 'CREATE EXTENSION pglogical;'
-    psql -d "dbname='${db_name}' user='postgres' password='${pg_psswd}' host='${pg_public_ip}'" -c 'CREATE EXTENSION pglogical;'
+    psql -d "dbname='postres' user='postgres' password='${pg_psswd}' host='${pg_public_ip}'" -c 'CREATE EXTENSION pglogical;'
 fi
 
 gsutil cp gs://${bucket_name}/jar/* .
