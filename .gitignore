@@ -24,5 +24,7 @@ hs_err_pid*
 replay_pid*
 
 */target
-*/.terraform
-terraform.state*
+*/.terraform*
+terraform.tfstate*
+.java-version
+dependency-reduced-pom.xml
