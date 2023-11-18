@@ -1,12 +1,21 @@
+locals {
+  instance_template = templatefile("${path.module}/templates/app_startup.sh.tpl", {
+    db_name       = local.db_name
+    pg_psswd      = var.postgres_passwd
+    pg_ip         = google_compute_address.pgbouncer_address.address
+    instance_name = google_sql_database_instance.source_pg.connection_name
+    bucket_name   = google_storage_bucket.staging.name
+  })
+}
 
 resource "google_service_account" "testsa" {
   project    = var.project
   account_id = "test-connectivity"
 }
 
-resource "google_compute_instance" "apps" {
+resource "google_compute_instance" "testapps" {
   count        = 1
-  name         = "apps-${count.index + 1}"
+  name         = "testapp-${var.run_name}-${count.index + 1}"
   machine_type = "n1-standard-4"
   project      = var.project
   zone         = var.zone
@@ -29,7 +38,7 @@ resource "google_compute_instance" "apps" {
     scopes = ["cloud-platform"]
   }
 
-  depends_on = [null_resource.stage_app_jar]
+  depends_on = [null_resource.stage_app_jar, google_compute_instance.pgbouncer]
 }
 
 module "data_processing_project_membership_roles" {

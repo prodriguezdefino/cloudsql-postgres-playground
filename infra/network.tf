@@ -16,7 +16,7 @@ resource "google_compute_subnetwork" "subnet_priv" {
 
 resource "google_compute_firewall" "allow_ssh" {
   name    = "allow-ssh-${var.run_name}"
-  project                            = var.project
+  project = var.project
   network = "${google_compute_network.net_priv.name}"
 
   allow {
@@ -28,10 +28,32 @@ resource "google_compute_firewall" "allow_ssh" {
   target_tags   = ["allow-ssh"]
 }
 
+resource "google_compute_firewall" "allow_pg" {
+  name    = "allow-pg-${var.run_name}"
+  project = var.project
+  network = "${google_compute_network.net_priv.name}"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["5432"]
+  }
+
+  source_ranges = ["10.0.0.0/8"]
+  target_tags   = ["allow-pg"]
+}
+
 resource "google_compute_address" "nat_ext_address" {
   project  = var.project
   name     = "nat-address-${var.run_name}"
   region   = var.region
+}
+
+resource "google_compute_address" "pgbouncer_address" {
+  project  = var.project
+  name     = "pgbouncer-address-${var.run_name}"
+  region   = var.region
+  subnetwork   = google_compute_subnetwork.subnet_priv.id
+  address_type = "INTERNAL"
 }
 
 resource "google_compute_router" "router" {

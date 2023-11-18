@@ -56,7 +56,7 @@ public class RentalProcessor implements Runnable {
   }
 
   void process() throws SQLException {
-    try (var conn = IAMConnectionPool.get().getConnection()) {
+    try (var conn = ConnectionPool.get().getConnection()) {
       SQLHelper.storeRental(SQLHelper.createRental(metadata, conn), conn);
     }
   }

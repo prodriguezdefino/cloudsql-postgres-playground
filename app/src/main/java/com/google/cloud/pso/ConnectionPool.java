@@ -22,18 +22,16 @@ import java.util.Optional;
 import javax.sql.DataSource;
 
 /** */
-public class IAMConnectionPool {
+public class ConnectionPool {
 
   private static DataSource INSTANCE = null;
 
   public static synchronized DataSource initialize(
-      String dbName, String user, String password, String instanceConnectionName) {
+      String instanceHost, String port, String dbName, String user, String password) {
     if (INSTANCE == null) {
       var config = new HikariConfig();
 
-      config.setJdbcUrl(String.format("jdbc:postgresql:///%s", dbName));
-      config.addDataSourceProperty("socketFactory", "com.google.cloud.sql.postgres.SocketFactory");
-      config.addDataSourceProperty("cloudSqlInstance", instanceConnectionName);
+      config.setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s", instanceHost, port, dbName));
       config.addDataSourceProperty("user", user);
       config.addDataSourceProperty("password", password);
       config.addDataSourceProperty("sslmode", "disable");
@@ -50,7 +48,7 @@ public class IAMConnectionPool {
   }
 
   static HikariConfig configureConnectionPool(HikariConfig config) {
-    config.setMaximumPoolSize(200);
+    config.setMaximumPoolSize(150);
     config.setMinimumIdle(5);
     config.setConnectionTimeout(10000); // 10 seconds
     config.setIdleTimeout(600000); // 10 minutes

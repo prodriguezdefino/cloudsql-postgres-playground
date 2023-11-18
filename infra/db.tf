@@ -1,12 +1,20 @@
+locals {
+  db_name = "source-${var.run_name}"
+}
 
 resource "random_id" "db_name_suffix" {
   byte_length = 4
 }
 
 resource "google_sql_database" "source" {
-    project = var.project
+  project = var.project
   name     = local.db_name
   instance = google_sql_database_instance.source_pg.name
+  lifecycle {
+    replace_triggered_by = [
+      google_sql_database_instance.source_pg.id
+    ]
+  }
 }
 
 resource "google_sql_database_instance" "source_pg" {
@@ -21,7 +29,8 @@ resource "google_sql_database_instance" "source_pg" {
     tier = "db-custom-32-122880"
 
     ip_configuration {
-      enable_private_path_for_google_cloud_services = false
+      private_network                               = var.setup_dms ? google_compute_network.net_priv.id : null
+      enable_private_path_for_google_cloud_services = var.setup_dms ? true : false
       require_ssl                                   = false
       authorized_networks {
           name  = google_compute_address.nat_ext_address.name

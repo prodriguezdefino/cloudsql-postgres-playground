@@ -42,6 +42,7 @@ public class TestApplication {
           new DefaultParser()
               .parse(
                   new Options()
+                      .addOption(Option.builder("host").argName("host").hasArg().required().build())
                       .addOption(Option.builder("db").argName("db").hasArg().required().build())
                       .addOption(Option.builder("usr").argName("usr").hasArg().required().build())
                       .addOption(Option.builder("pwd").argName("pwd").hasArg().required().build())
@@ -50,20 +51,15 @@ public class TestApplication {
                               .argName("parallelism")
                               .hasArg()
                               .optionalArg(true)
-                              .build())
-                      .addOption(
-                          Option.builder("instance")
-                              .argName("instance")
-                              .hasArg()
-                              .required()
                               .build()),
                   args);
       var pool =
-          IAMConnectionPool.initialize(
+          ConnectionPool.initialize(
+              parsedArgs.getOptionValue("host"),
+              "5432",
               parsedArgs.getOptionValue("db"),
               parsedArgs.getOptionValue("usr"),
-              parsedArgs.getOptionValue("pwd"),
-              parsedArgs.getOptionValue("instance"));
+              parsedArgs.getOptionValue("pwd"));
       setupMetrics();
       var parallelism = Integer.valueOf(parsedArgs.getOptionValue("parallelism", "100"));
 
