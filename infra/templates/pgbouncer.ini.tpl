@@ -18,6 +18,7 @@ admin_users = ${admin_users}
 stats_users = ${admin_users}
 ignore_startup_parameters = extra_float_digits, options
 application_name_add_host = 1
+max_prepared_statements = 10
 
 %{~ else ~}
 # Custom Config -------------------------------------------------------------- #
