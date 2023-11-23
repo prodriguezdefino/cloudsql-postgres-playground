@@ -65,7 +65,7 @@ public class TestApplication {
 
       Types.StaticMetadata metadata = SQLHelper.retrieveMetadata(pool);
 
-      try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      try (var executor = Executors.newFixedThreadPool(parallelism)) {
         IntStream.range(0, parallelism).forEach(i -> executor.submit(RentalProcessor.of(metadata)));
         executor.awaitTermination(1, TimeUnit.DAYS);
       } catch (InterruptedException ex) {

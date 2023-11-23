@@ -16,11 +16,25 @@ resource "google_storage_bucket" "staging" {
   public_access_prevention = "enforced"
 }
 
-variable run_name {
+resource "google_service_account" "testsa" {
+  project    = var.project
+  account_id = "test-connectivity"
 }
 
-variable project {}
+module "data_processing_project_membership_roles" {
+  source                  = "terraform-google-modules/iam/google//modules/member_iam"
+  service_account_address = google_service_account.testsa.email
+  project_id              = var.project
+  project_roles           = [
+    "roles/storage.objectAdmin",
+    "roles/cloudsql.instanceUser",
+    "roles/cloudsql.client",
+    "roles/monitoring.metricWriter",
+    ]
+}
 
+variable run_name {}
+variable project {}
 variable region { default = "us-central1"}
 variable zone { default = "us-central1-a"}
 variable postgres_passwd { default = "somepassword"}

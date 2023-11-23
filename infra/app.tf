@@ -8,11 +8,6 @@ locals {
   })
 }
 
-resource "google_service_account" "testsa" {
-  project    = var.project
-  account_id = "test-connectivity"
-}
-
 resource "google_compute_instance" "testapps" {
   count        = 1
   name         = "testapp-${var.run_name}-${count.index + 1}"
@@ -39,25 +34,11 @@ resource "google_compute_instance" "testapps" {
   }
 
   depends_on = [null_resource.stage_app_jar, google_compute_instance.pgbouncer]
-}
-
-module "data_processing_project_membership_roles" {
-  source                  = "terraform-google-modules/iam/google//modules/member_iam"
-  service_account_address = google_service_account.testsa.email
-  project_id              = var.project
-  project_roles           = [
-    "roles/storage.objectAdmin",
-    "roles/cloudsql.instanceUser",
-    "roles/cloudsql.client",
-    "roles/monitoring.metricWriter",
+  lifecycle {
+    replace_triggered_by = [
+      google_compute_instance.pgbouncer.id
     ]
-}
-
-resource "google_sql_user" "iam_service_account_user" {
-  project  = var.project
-  name     = trimsuffix(google_service_account.testsa.email, ".gserviceaccount.com")
-  instance = google_sql_database_instance.source_pg.name
-  type     = "CLOUD_IAM_SERVICE_ACCOUNT"
+  }
 }
 
 resource "null_resource" "stage_app_jar" {

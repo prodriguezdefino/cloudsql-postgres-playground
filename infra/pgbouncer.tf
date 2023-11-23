@@ -1,7 +1,6 @@
 locals {
-    users            = [{ name = "postgres", password = "md5${md5("${var.postgres_passwd}postgres")}" }]
-    userlist         = templatefile("${path.module}/templates/userlist.txt.tpl", { users = local.users })
-    pg_ip            = var.setup_dms ? google_sql_database_instance.source_pg.private_ip_address : google_sql_database_instance.source_pg.public_ip_address
+    source_pg_ip     = var.setup_dms ? google_sql_database_instance.source_pg.private_ip_address : google_sql_database_instance.source_pg.public_ip_address
+    pg_ip            = var.migrated_db_ip == "" ? local.source_pg_ip : var.migrated_db_ip
     pgbouncer_config = templatefile(
         "${path.module}/templates/pgbouncer.ini.tpl",
         {
@@ -19,7 +18,8 @@ locals {
         })
     pgbouncer_instance_template = templatefile("${path.module}/templates/pgbouncer_startup_script.sh.tpl", {
         pgbouncer_config = local.pgbouncer_config
-        users_config     = local.userlist
+        pg_psswd         = var.postgres_passwd
+        pg_ip            = local.pg_ip
     })
 }
 
@@ -50,4 +50,8 @@ resource "google_compute_instance" "pgbouncer" {
   }
 
   depends_on = [google_sql_database_instance.source_pg]
+}
+
+variable migrated_db_ip {
+    default = ""
 }

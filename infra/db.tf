@@ -52,7 +52,21 @@ resource "google_sql_database_instance" "source_pg" {
       name  = "cloudsql.logical_decoding"
       value = "on"
     }
+
+    database_flags {
+      name  = "cloudsql.pg_shadow_select_role"
+      value = "pgbouncer"
+    }
+
   }
 
   depends_on =[google_service_networking_connection.private_vpc_connection]
+}
+
+resource "google_sql_user" "pg_bouncer" {
+  project         = var.project
+  name            = "pgbouncer"
+  instance        = google_sql_database_instance.source_pg.name
+  password        = var.postgres_passwd
+  deletion_policy = "ABANDON"
 }

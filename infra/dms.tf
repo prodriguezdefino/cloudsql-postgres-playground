@@ -1,4 +1,4 @@
-resource "google_database_migration_service_private_connection" "default" {
+resource "google_database_migration_service_private_connection" "private_connection" {
     count                 = var.setup_dms ? 1 : 0
 
     project               = var.project
